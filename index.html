@@ -1,0 +1,893 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Дневник">
+<meta name="theme-color" content="#6C5FF5">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Школьный Дневник</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#050508;--bg2:#09090f;--bg3:#0f0f18;--bg4:#151520;--bg5:#1c1c28;
+  --p:#6c5ff5;--p2:#9d97ff;--p3:#c0bcff;--pdim:rgba(108,95,245,0.15);--pring:rgba(108,95,245,0.3);
+  --t:#f5f5ff;--t2:#a8a8d0;--t3:#606090;
+  --red:#e05555;--ora:#d4854a;--grn:#3fa86e;
+  --bd:rgba(255,255,255,0.06);--bd2:rgba(255,255,255,0.11);
+}
+*{font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;}
+.phone{width:393px;height:852px;margin:0 auto;background:var(--bg);border-radius:50px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;}
+.scr{display:none;flex-direction:column;height:100%;overflow:hidden;position:relative;z-index:1;}
+.scr.on{display:flex;}
+.sb{padding:16px 24px 2px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.sbt{color:var(--t);font-size:15px;font-weight:700;}
+.sbic{display:flex;gap:5px;align-items:center;color:var(--t);font-size:11px;}
+.hd{padding:2px 20px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.pgt{color:var(--t);font-size:27px;font-weight:800;letter-spacing:-.8px;}
+.avbtn{width:38px;height:38px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;cursor:pointer;border:none;flex-shrink:0;}
+.grwrap{overflow:hidden;transition:max-height .3s,opacity .3s,padding .3s;max-height:70px;opacity:1;padding:8px 20px 10px;}
+.grwrap.col{max-height:0;opacity:0;padding:0 20px;}
+.dlbl{color:var(--t2);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:3px;}
+.grt{color:var(--t);font-size:19px;font-weight:700;}
+.scrl{flex:1;overflow-y:auto;scrollbar-width:none;}
+.scrl::-webkit-scrollbar{display:none;}
+/* STAT */
+.stat{margin:4px 16px 16px;border-radius:22px;padding:20px 22px 18px;position:relative;overflow:hidden;background:var(--p);}
+.sc1{position:absolute;top:-50px;right:-40px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none;}
+.sc2{position:absolute;bottom:-55px;right:50px;width:145px;height:145px;border-radius:50%;background:rgba(0,0,0,.12);pointer-events:none;}
+.stz{position:relative;z-index:2;}
+.st-lbl{color:rgba(255,255,255,.55);font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;}
+.st-num{color:#fff;font-size:54px;font-weight:800;line-height:1;letter-spacing:-3px;}
+.st-num span{font-size:32px;opacity:.6;}
+.st-sub{color:rgba(255,255,255,.45);font-size:11px;margin-top:4px;}
+.st-line{height:1px;background:rgba(255,255,255,.13);margin:14px 0;}
+.st-row{display:flex;}
+.st-col{flex:1;}
+.st-val{color:#fff;font-size:21px;font-weight:800;}
+.st-key{color:rgba(255,255,255,.45);font-size:10.5px;margin-top:2px;}
+.st-bars{position:absolute;right:20px;top:20px;display:flex;align-items:flex-end;gap:4px;height:44px;z-index:2;}
+.st-bars span{width:4px;border-radius:3px;background:rgba(255,255,255,.2);}
+.st-bars span.hi{background:rgba(255,255,255,.65);}
+.slbl{color:var(--t2);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:0 20px;margin-bottom:8px;}
+/* lesson */
+.les{background:var(--bg3);border-radius:16px;margin:0 16px 7px;border:1px solid var(--bd);cursor:pointer;overflow:hidden;}
+.les-row{padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.sico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;letter-spacing:.2px;text-align:center;line-height:1.2;}
+.c-rus{background:#1e1030;color:#b878d8;}.c-lit{background:#200e28;color:#d080e8;}
+.c-eng{background:#1a0e1c;color:#c060c0;}.c-alg{background:#181b38;color:#7888f0;}
+.c-ver{background:#0e183a;color:#5878e8;}.c-geo2{background:#12183a;color:#6080f0;}
+.c-inf{background:#081e18;color:#48c8a0;}.c-fiz{background:#221608;color:#c08848;}
+.c-him{background:#0e2018;color:#48b878;}.c-bio{background:#180e26;color:#a068d0;}
+.c-ist{background:#0d2016;color:#40a870;}.c-obs{background:#1a1a08;color:#c0b040;}
+.c-geo{background:#1e1a0e;color:#b8a848;}.c-fkult{background:#200818;color:#e06080;}
+.c-obzr{background:#1a0a0a;color:#e07050;}.c-razg{background:#0a1a2a;color:#50a0e0;}
+.lb{flex:1;min-width:0;}
+.ln{color:var(--t);font-size:14px;font-weight:650;}
+.lt{color:var(--t2);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ltm{color:var(--t3);font-size:11.5px;flex-shrink:0;}
+.hw-panel{display:none;padding:0 14px 13px 64px;}
+.hw-panel.open{display:block;}
+.hw-lbl{color:var(--t3);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.hw-txt{color:var(--t);font-size:13px;line-height:1.5;}
+.hw-inp{background:var(--bg4);border:1px solid var(--bd2);border-radius:10px;padding:8px 12px;color:var(--t);font-size:12.5px;width:100%;outline:none;margin-top:7px;font-family:inherit;}
+.hw-inp::placeholder{color:var(--t3);}
+.ai-block{margin-top:10px;}
+.ai-toggle{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--bd2);margin-bottom:8px;}
+.ai-toggle button{flex:1;padding:7px;background:var(--bg4);border:none;color:var(--t3);font-size:11.5px;cursor:pointer;font-family:inherit;}
+.ai-toggle button.on{background:var(--p);color:#fff;font-weight:700;}
+.ai-ask-btn{width:100%;background:var(--pdim);border:1px solid var(--pring);border-radius:10px;padding:9px;color:var(--p3);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.ai-result{background:var(--bg4);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;color:var(--t);font-size:12.5px;line-height:1.6;white-space:pre-wrap;margin-top:6px;}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:12px;padding:8px 0;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--p2);animation:blink 1s ease-in-out infinite;}
+.ai-dot:nth-child(2){animation-delay:.2s;}.ai-dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+/* NAVBAR */
+.navbar{height:72px;background:var(--bg2);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-around;padding:0 4px 10px;flex-shrink:0;position:relative;z-index:2;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--t3);font-size:9.5px;cursor:pointer;padding:6px 10px;border-radius:12px;}
+.ni i{font-size:21px;}
+.ni.on{color:var(--p2);}
+.vfab-wrap{display:flex;flex-direction:column;align-items:center;position:relative;}
+.vfab{width:54px;height:54px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;outline:none;margin-top:-18px;box-shadow:0 4px 20px rgba(108,95,245,.45);position:relative;z-index:3;}
+.vfab.rec{background:#c0392b;}
+.vfab-lbl{color:var(--t3);font-size:8.5px;letter-spacing:.8px;text-transform:uppercase;margin-top:2px;}
+/* timer */
+.tp-wrap{display:flex;justify-content:center;flex-shrink:0;}
+.tp{display:none;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--pring);border-radius:22px;padding:7px 14px;margin:4px 0 6px;}
+.tp.show{display:flex;}
+.tp-dot{width:7px;height:7px;border-radius:50%;background:var(--p2);animation:blink 1s ease-in-out infinite;flex-shrink:0;}
+.tp-time{color:var(--t);font-size:14px;font-weight:700;min-width:36px;font-variant-numeric:tabular-nums;}
+.tp-stop{background:none;border:1px solid var(--bd2);color:var(--t2);font-size:10.5px;padding:3px 10px;border-radius:10px;cursor:pointer;font-family:inherit;}
+/* week */
+.wknav{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 10px;flex-shrink:0;}
+.wkt{color:var(--t);font-size:15px;font-weight:700;}
+.wka{background:var(--bg3);border:1px solid var(--bd2);color:var(--t2);width:28px;height:28px;border-radius:9px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.days{display:flex;gap:4px;padding:0 16px 12px;flex-shrink:0;}
+.day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:13px;cursor:pointer;}
+.day.on{background:var(--p);}
+.day .dn{font-size:9.5px;color:var(--t3);}
+.day.on .dn{color:rgba(255,255,255,.65);}
+.day .dd{font-size:17px;font-weight:800;color:var(--t);}
+.day.on .dd{color:#fff;}
+/* tasks */
+.ttop{padding:4px 20px 10px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
+.tc .num{color:var(--t);font-size:38px;font-weight:800;letter-spacing:-2px;line-height:1;}
+.tc .lbl{color:var(--t2);font-size:10px;margin-top:2px;}
+.btn-n{background:var(--bg3);border:1px solid var(--bd2);color:var(--t2);padding:8px 12px;border-radius:11px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
+.btn-a{background:var(--p);border:none;color:#fff;padding:8px 12px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
+.task{background:var(--bg3);border-radius:14px;margin:0 16px 7px;padding:12px 14px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);cursor:pointer;}
+.task.done-item .tn{text-decoration:line-through;color:var(--t3);}
+.task.done-item .tsj{color:var(--t3);}
+.tdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.tb2{flex:1;}
+.tn{color:var(--t);font-size:13.5px;font-weight:550;}
+.tsj{color:var(--t2);font-size:11px;margin-top:2px;}
+.tdate{font-size:11.5px;}
+.tdate.u{color:var(--red);font-weight:650;}.tdate.o{color:var(--ora);font-weight:650;}.tdate.n{color:var(--t3);}
+/* grades */
+.gtop{display:flex;gap:10px;padding:8px 16px 12px;flex-shrink:0;}
+.gc{flex:1;background:var(--bg3);border-radius:15px;padding:14px;border:1px solid var(--bd);}
+.gv{color:var(--t);font-size:28px;font-weight:800;letter-spacing:-1px;}
+.gv.up{color:var(--grn);font-size:21px;}
+.gl{color:var(--t2);font-size:10px;margin-top:3px;}
+.agb{background:var(--bg3);border-radius:18px;padding:14px 16px;margin:0 16px 12px;border:1px solid var(--bd2);flex-shrink:0;}
+.agt{color:var(--p2);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.chip{padding:5px 11px;border-radius:20px;font-size:11.5px;color:var(--t2);background:var(--bg4);cursor:pointer;border:1px solid transparent;font-family:inherit;}
+.chip.on{background:var(--p);color:#fff;}
+.gnrow{display:flex;border-radius:12px;overflow:hidden;}
+.gn{flex:1;height:44px;background:var(--bg4);border:none;border-right:1px solid var(--bg);color:var(--t);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+.gn:last-child{border-right:none;}
+.gn.on{background:var(--p);color:#fff;}
+.addgbtn{width:100%;background:var(--p);border:none;color:#fff;padding:11px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:9px;}
+.sg{background:var(--bg3);border-radius:16px;padding:13px 14px;margin:0 16px 8px;border:1px solid var(--bd);}
+.sgh{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.sgn{color:var(--t);font-size:14px;font-weight:700;}
+.sga{color:var(--t);font-size:15px;font-weight:800;}
+.sg-row{display:flex;gap:8px;align-items:flex-end;}
+.gbs{display:flex;gap:3px;flex:1;}
+.gb{flex:1;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);}
+.g5{background:#2a2555;}.g4{background:#1a2040;}.g3{background:#2a1e08;}.g2{background:#2a1010;}
+.gnw{outline:1.5px solid rgba(255,255,255,.3);outline-offset:1px;}
+.mc{width:54px;height:30px;flex-shrink:0;}
+/* SETTINGS */
+.set-scrl{flex:1;overflow-y:auto;scrollbar-width:none;padding:0 16px 24px;}
+.set-scrl::-webkit-scrollbar{display:none;}
+.s-sec{margin-bottom:18px;}
+.s-sec-t{color:var(--t2);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding:0 2px;}
+.s-card{background:var(--bg3);border-radius:18px;border:1px solid var(--bd2);overflow:hidden;}
+.s-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bd);}
+.s-row:last-child{border-bottom:none;}
+.s-ico{width:30px;height:30px;border-radius:8px;background:var(--pdim);display:flex;align-items:center;justify-content:center;color:var(--p2);flex-shrink:0;font-size:13px;}
+.s-lbl{color:var(--t2);font-size:11.5px;flex-shrink:0;width:80px;}
+.s-val{flex:1;background:var(--bg4);border:1px solid var(--bd2);border-radius:9px;padding:7px 10px;color:var(--t);font-size:12.5px;outline:none;font-family:inherit;}
+.s-val::placeholder{color:var(--t3);}
+.s-api-note{color:var(--t3);font-size:11px;padding:6px 2px;line-height:1.5;}
+.day-tabs{display:flex;gap:4px;margin-bottom:10px;}
+.day-tab{flex:1;padding:8px 2px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);color:var(--t2);font-size:11px;font-weight:600;text-align:center;cursor:pointer;}
+.day-tab.on{background:var(--p);color:#fff;border-color:var(--p);}
+.sch-card{background:var(--bg3);border-radius:16px;border:1px solid var(--bd2);overflow:hidden;}
+.sch-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--bd);}
+.sch-row:last-child{border-bottom:none;}
+.sch-num{color:var(--t3);font-size:10.5px;font-weight:700;width:14px;flex-shrink:0;}
+.sch-inp{flex:1;background:var(--bg4);border:1px solid var(--bd2);border-radius:8px;padding:6px 10px;color:var(--t);font-size:12.5px;outline:none;font-family:inherit;}
+.sch-inp::placeholder{color:var(--t3);}
+.sch-time{color:var(--t3);font-size:10px;width:38px;text-align:right;flex-shrink:0;}
+/* OVERLAYS — ключевое исправление: pointer-events:none когда скрыты */
+.ov{pointer-events:none;opacity:0;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(3,3,8,.97);z-index:50;flex-direction:column;align-items:center;justify-content:space-between;border-radius:50px;padding:40px 24px 50px;display:flex;transition:opacity .2s;}
+.ov.show{pointer-events:all;opacity:1;}
+.mwrap{pointer-events:none;opacity:0;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(3,3,8,.92);z-index:40;align-items:flex-end;border-radius:50px;display:flex;transition:opacity .2s;}
+.mwrap.show{pointer-events:all;opacity:1;}
+/* voice overlay inner */
+.ov-top{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.ov-tag{background:rgba(108,95,245,.2);border:1px solid rgba(108,95,245,.4);border-radius:20px;padding:5px 14px;color:var(--p3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;}
+.ov-title{color:var(--t);font-size:22px;font-weight:800;letter-spacing:-.5px;margin-top:4px;}
+.ov-mid{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
+.ov-vis{display:flex;align-items:center;justify-content:center;gap:3px;height:60px;}
+.ov-bar{width:4px;border-radius:3px;background:var(--p2);}
+.ov.show .ov-bar{animation:wave 1.2s ease-in-out infinite;}
+.ov-bar:nth-child(1){height:18px;animation-delay:0s;}
+.ov-bar:nth-child(2){height:34px;animation-delay:.1s;}
+.ov-bar:nth-child(3){height:50px;animation-delay:.2s;}
+.ov-bar:nth-child(4){height:38px;animation-delay:.3s;}
+.ov-bar:nth-child(5){height:54px;animation-delay:.4s;}
+.ov-bar:nth-child(6){height:30px;animation-delay:.5s;}
+.ov-bar:nth-child(7){height:46px;animation-delay:.4s;}
+.ov-bar:nth-child(8){height:34px;animation-delay:.3s;}
+.ov-bar:nth-child(9){height:50px;animation-delay:.2s;}
+.ov-bar:nth-child(10){height:26px;animation-delay:.1s;}
+.ov-bar:nth-child(11){height:14px;animation-delay:0s;}
+@keyframes wave{0%,100%{transform:scaleY(.25);opacity:.35}50%{transform:scaleY(1);opacity:1}}
+.ov-transcript{background:var(--bg3);border:1px solid var(--bd2);border-radius:14px;padding:12px 16px;width:100%;min-height:52px;}
+.ov-tr-lbl{color:var(--t3);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.ov-tr-txt{color:var(--t);font-size:13.5px;line-height:1.5;min-height:20px;}
+.ov-examples{background:var(--bg3);border:1px solid var(--bd2);border-radius:14px;padding:12px 16px;width:100%;}
+.ov-ex-lbl{color:var(--t3);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.ov-ex{color:var(--t2);font-size:12px;line-height:1.7;}
+.ov-ex span{color:var(--p3);font-weight:600;}
+.ov-bottom{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+.ov-timer-big{color:var(--t);font-size:38px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums;}
+.ov-confirm{width:100%;background:var(--p);border:none;color:#fff;padding:15px;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:none;align-items:center;justify-content:center;gap:8px;}
+.ov-confirm.show{display:flex;}
+.ov-stop{width:100%;background:rgba(192,57,43,.85);border:none;color:#fff;padding:13px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ov-cancel{background:none;border:none;color:var(--t3);font-size:13px;cursor:pointer;font-family:inherit;}
+/* modal inner */
+.modal{background:var(--bg2);border-radius:28px 28px 0 0;padding:20px 20px 40px;width:100%;border-top:1px solid var(--bd2);}
+.m-handle{width:36px;height:4px;border-radius:2px;background:var(--bg5);margin:0 auto 16px;}
+.m-title{color:var(--t);font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px;}
+.m-inp{background:var(--bg3);border:1px solid var(--bd2);border-radius:13px;padding:12px 14px;color:var(--t);font-size:14px;width:100%;outline:none;margin-bottom:10px;font-family:inherit;}
+.m-inp::placeholder{color:var(--t3);}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.mchip{padding:7px 13px;border-radius:11px;font-size:12.5px;color:var(--t2);background:var(--bg3);cursor:pointer;border:1px solid var(--bd);font-family:inherit;}
+.mchip.on{background:var(--p);color:#fff;border-color:var(--p);}
+.m-btn{width:100%;background:var(--p);border:none;color:#fff;padding:14px;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;}
+.m-cancel{width:100%;background:transparent;border:none;color:var(--t3);padding:10px;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;}
+.notes-area{background:var(--bg3);border:1px solid var(--bd2);border-radius:13px;padding:13px 14px;color:var(--t);font-size:14px;width:100%;outline:none;min-height:120px;resize:none;font-family:inherit;margin-bottom:10px;}
+.notes-area::placeholder{color:var(--t3);}
+.toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--pring);color:var(--t);padding:10px 18px;border-radius:20px;font-size:13px;z-index:100;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s;}
+.toast.show{opacity:1;}
+</style>
+
+<div class="phone">
+
+<!-- HOME -->
+<div class="scr on" id="s-home">
+  <div class="sb"><span class="sbt">9:41</span><div class="sbic"><i class="ti ti-signal-4g" style="font-size:12px"></i>&nbsp;<i class="ti ti-wifi" style="font-size:12px"></i>&nbsp;<i class="ti ti-battery-2" style="font-size:12px"></i></div></div>
+  <div class="hd"><div class="pgt">Дневник</div><button class="avbtn" id="av-h" onclick="go('settings')">АБ</button></div>
+  <div class="grwrap" id="grwrap"><div class="dlbl">СР. 10 ИЮНЯ</div><div class="grt" id="hgrt">Привет 👋</div></div>
+  <div class="tp-wrap"><div class="tp" id="tp-home"><div class="tp-dot"></div><span class="tp-time" id="tpt-home">0:00</span><button class="tp-stop" onclick="stopV('home')">Стоп</button></div></div>
+  <div class="scrl" id="home-scrl">
+    <div style="padding:4px 16px 16px">
+      <div class="stat"><div class="sc1"></div><div class="sc2"></div>
+        <div class="stz">
+          <div class="st-bars"><span style="height:10px"></span><span style="height:16px" class="hi"></span><span style="height:24px" class="hi"></span><span style="height:14px" class="hi"></span><span style="height:30px" class="hi"></span><span style="height:38px" class="hi"></span><span style="height:44px" class="hi"></span></div>
+          <div class="st-lbl">Успеваемость</div>
+          <div class="st-num" id="avg-big">—<span></span></div>
+          <div class="st-sub" id="avg-sub">нет оценок</div>
+          <div class="st-line"></div>
+          <div class="st-row">
+            <div class="st-col"><div class="st-val">16</div><div class="st-key">предметов</div></div>
+            <div class="st-col"><div class="st-val" id="today-cnt">0</div><div class="st-key">уроков сегодня</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slbl" id="today-lbl" style="display:none">Сегодня</div>
+    <div id="today-les"></div>
+    <div style="height:20px"></div>
+  </div>
+  <div class="navbar">
+    <div class="ni on" onclick="go('home')"><i class="ti ti-home"></i><span>Главная</span></div>
+    <div class="ni" onclick="go('sch')"><i class="ti ti-calendar"></i><span>Расписание</span></div>
+    <div class="vfab-wrap"><button class="vfab" id="vfab-home" onclick="toggleVoice('home')"><i class="ti ti-microphone"></i></button><span class="vfab-lbl">Голос</span></div>
+    <div class="ni" onclick="go('tasks')"><i class="ti ti-checkbox"></i><span>Задания</span></div>
+    <div class="ni" onclick="go('grades')"><i class="ti ti-chart-bar"></i><span>Оценки</span></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="scr" id="s-sch">
+  <div class="sb"><span class="sbt">9:41</span><div class="sbic"><i class="ti ti-signal-4g" style="font-size:12px"></i>&nbsp;<i class="ti ti-wifi" style="font-size:12px"></i>&nbsp;<i class="ti ti-battery-2" style="font-size:12px"></i></div></div>
+  <div class="hd"><div class="pgt">Расписание</div><button class="avbtn" id="av-s" onclick="go('settings')">АБ</button></div>
+  <div class="wknav"><button class="wka" onclick="changeWeek(-1)">‹</button><span class="wkt" id="wk-title">Июнь 2026</span><button class="wka" onclick="changeWeek(1)">›</button></div>
+  <div class="days" id="wk-days"></div>
+  <div class="tp-wrap"><div class="tp" id="tp-sch"><div class="tp-dot"></div><span class="tp-time" id="tpt-sch">0:00</span><button class="tp-stop" onclick="stopV('sch')">Стоп</button></div></div>
+  <div class="scrl" id="sch-list"></div>
+  <div class="navbar">
+    <div class="ni" onclick="go('home')"><i class="ti ti-home"></i><span>Главная</span></div>
+    <div class="ni on" onclick="go('sch')"><i class="ti ti-calendar"></i><span>Расписание</span></div>
+    <div class="vfab-wrap"><button class="vfab" id="vfab-sch" onclick="toggleVoice('sch')"><i class="ti ti-microphone"></i></button><span class="vfab-lbl">Голос</span></div>
+    <div class="ni" onclick="go('tasks')"><i class="ti ti-checkbox"></i><span>Задания</span></div>
+    <div class="ni" onclick="go('grades')"><i class="ti ti-chart-bar"></i><span>Оценки</span></div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="scr" id="s-tasks">
+  <div class="sb"><span class="sbt">9:41</span><div class="sbic"><i class="ti ti-signal-4g" style="font-size:12px"></i>&nbsp;<i class="ti ti-wifi" style="font-size:12px"></i>&nbsp;<i class="ti ti-battery-2" style="font-size:12px"></i></div></div>
+  <div class="hd"><div class="pgt">Задания</div><button class="avbtn" id="av-t" onclick="go('settings')">АБ</button></div>
+  <div class="ttop">
+    <div class="tc"><div class="num" id="task-cnt">0</div><div class="lbl">активных заданий</div></div>
+    <button class="btn-n" onclick="openM('m-notes')"><i class="ti ti-notes" style="font-size:13px"></i> Заметки</button>
+    <button class="btn-a" onclick="openM('m-task')"><i class="ti ti-plus" style="font-size:13px"></i> Задание</button>
+  </div>
+  <div class="tp-wrap"><div class="tp" id="tp-tasks"><div class="tp-dot"></div><span class="tp-time" id="tpt-tasks">0:00</span><button class="tp-stop" onclick="stopV('tasks')">Стоп</button></div></div>
+  <div class="scrl">
+    <div class="slbl">Активные</div><div id="active-tasks"></div>
+    <div class="slbl" style="margin-top:10px">Выполнено</div><div id="done-tasks"></div>
+    <div style="height:20px"></div>
+  </div>
+  <div class="navbar">
+    <div class="ni" onclick="go('home')"><i class="ti ti-home"></i><span>Главная</span></div>
+    <div class="ni" onclick="go('sch')"><i class="ti ti-calendar"></i><span>Расписание</span></div>
+    <div class="vfab-wrap"><button class="vfab" id="vfab-tasks" onclick="toggleVoice('tasks')"><i class="ti ti-microphone"></i></button><span class="vfab-lbl">Голос</span></div>
+    <div class="ni on" onclick="go('tasks')"><i class="ti ti-checkbox"></i><span>Задания</span></div>
+    <div class="ni" onclick="go('grades')"><i class="ti ti-chart-bar"></i><span>Оценки</span></div>
+  </div>
+</div>
+
+<!-- GRADES -->
+<div class="scr" id="s-grades">
+  <div class="sb"><span class="sbt">9:41</span><div class="sbic"><i class="ti ti-signal-4g" style="font-size:12px"></i>&nbsp;<i class="ti ti-wifi" style="font-size:12px"></i>&nbsp;<i class="ti ti-battery-2" style="font-size:12px"></i></div></div>
+  <div class="hd"><div class="pgt">Оценки</div><button class="avbtn" id="av-g" onclick="go('settings')">АБ</button></div>
+  <div class="gtop">
+    <div class="gc"><div class="gv" id="avg-val">—</div><div class="gl">средний балл</div></div>
+    <div class="gc"><div class="gv up">—</div><div class="gl">за месяц</div></div>
+  </div>
+  <div class="agb">
+    <div class="agt">Отметить оценку</div>
+    <div class="chips" id="g-chips"></div>
+    <div class="gnrow">
+      <button class="gn" onclick="selGrade(this)">2</button>
+      <button class="gn" onclick="selGrade(this)">3</button>
+      <button class="gn" onclick="selGrade(this)">4</button>
+      <button class="gn on" onclick="selGrade(this)">5</button>
+    </div>
+    <button class="addgbtn" onclick="addGrade()">Добавить оценку</button>
+  </div>
+  <div class="tp-wrap"><div class="tp" id="tp-grades"><div class="tp-dot"></div><span class="tp-time" id="tpt-grades">0:00</span><button class="tp-stop" onclick="stopV('grades')">Стоп</button></div></div>
+  <div class="scrl" id="g-list" style="padding-bottom:8px"></div>
+  <div class="navbar">
+    <div class="ni" onclick="go('home')"><i class="ti ti-home"></i><span>Главная</span></div>
+    <div class="ni" onclick="go('sch')"><i class="ti ti-calendar"></i><span>Расписание</span></div>
+    <div class="vfab-wrap"><button class="vfab" id="vfab-grades" onclick="toggleVoice('grades')"><i class="ti ti-microphone"></i></button><span class="vfab-lbl">Голос</span></div>
+    <div class="ni" onclick="go('tasks')"><i class="ti ti-checkbox"></i><span>Задания</span></div>
+    <div class="ni on" onclick="go('grades')"><i class="ti ti-chart-bar"></i><span>Оценки</span></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="scr" id="s-settings">
+  <div class="sb"><span class="sbt">9:41</span><div class="sbic"><i class="ti ti-signal-4g" style="font-size:12px"></i>&nbsp;<i class="ti ti-wifi" style="font-size:12px"></i>&nbsp;<i class="ti ti-battery-2" style="font-size:12px"></i></div></div>
+  <div class="hd" style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:22px;padding:0" onclick="go('home')"><i class="ti ti-arrow-left"></i></button>
+      <div class="pgt">Настройки</div>
+    </div>
+    <button class="avbtn" id="av-set" style="width:40px;height:40px;font-size:12px">АБ</button>
+  </div>
+  <div class="set-scrl">
+    <div class="s-sec">
+      <div class="s-sec-t">Профиль</div>
+      <div class="s-card">
+        <div class="s-row"><div class="s-ico"><i class="ti ti-user"></i></div><span class="s-lbl">Имя</span><input class="s-val" id="inp-name" placeholder="Введи имя..." oninput="updateProfile()"></div>
+        <div class="s-row"><div class="s-ico"><i class="ti ti-user"></i></div><span class="s-lbl">Фамилия</span><input class="s-val" id="inp-sur" placeholder="Введи фамилию..." oninput="updateProfile()"></div>
+      </div>
+    </div>
+    <div class="s-sec">
+      <div class="s-sec-t">Gemini API ключ</div>
+      <div class="s-card">
+        <div class="s-row"><div class="s-ico"><i class="ti ti-robot"></i></div><span class="s-lbl">API Key</span><input class="s-val" id="inp-api" type="password" placeholder="AIza..." oninput="apiKey=this.value"></div>
+      </div>
+      <div class="s-api-note">Получи бесплатно: aistudio.google.com → Get API key</div>
+    </div>
+    <div class="s-sec">
+      <div class="s-sec-t">Предметы и учебники</div>
+      <div class="s-card" id="subj-set"></div>
+    </div>
+    <div class="s-sec">
+      <div class="s-sec-t">Расписание по дням</div>
+      <div class="day-tabs" id="day-tabs-set">
+        <div class="day-tab on" onclick="selDay(this,0)">Пн</div>
+        <div class="day-tab" onclick="selDay(this,1)">Вт</div>
+        <div class="day-tab" onclick="selDay(this,2)">Ср</div>
+        <div class="day-tab" onclick="selDay(this,3)">Чт</div>
+        <div class="day-tab" onclick="selDay(this,4)">Пт</div>
+      </div>
+      <div class="sch-card" id="sch-slots"></div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+</div>
+
+<!-- VOICE OVERLAY -->
+<div class="ov" id="ov-main">
+  <div class="ov-top">
+    <div class="ov-tag">Голосовой ввод</div>
+    <div class="ov-title">Говорите сейчас</div>
+  </div>
+  <div class="ov-mid">
+    <div class="ov-vis">
+      <div class="ov-bar"></div><div class="ov-bar"></div><div class="ov-bar"></div>
+      <div class="ov-bar"></div><div class="ov-bar"></div><div class="ov-bar"></div>
+      <div class="ov-bar"></div><div class="ov-bar"></div><div class="ov-bar"></div>
+      <div class="ov-bar"></div><div class="ov-bar"></div>
+    </div>
+    <div class="ov-transcript">
+      <div class="ov-tr-lbl">Распознано</div>
+      <div class="ov-tr-txt" id="ov-tr">Ждём речь...</div>
+    </div>
+    <div class="ov-examples">
+      <div class="ov-ex-lbl">Примеры</div>
+      <div class="ov-ex"><span>«Алгебра,</span> параграф 14, стр. 45»</div>
+      <div class="ov-ex"><span>«История,</span> пересказ параграфа 8»</div>
+      <div class="ov-ex"><span>«Физика,</span> задачи номер 3, 5, 7»</div>
+    </div>
+  </div>
+  <div class="ov-bottom">
+    <div class="ov-timer-big" id="ov-timer">0:00</div>
+    <button class="ov-confirm" id="ov-confirm" onclick="confirmVoice()"><i class="ti ti-check" style="font-size:18px"></i> Сохранить ДЗ</button>
+    <button class="ov-stop" onclick="stopListening()"><i class="ti ti-player-stop" style="font-size:18px"></i> Остановить</button>
+    <button class="ov-cancel" onclick="closeOv()">Отмена</button>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="mwrap" id="m-task">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Новое задание</div>
+    <input class="m-inp" id="new-task-name" placeholder="Название задания...">
+    <div class="mchips" id="task-chips"></div>
+    <input class="m-inp" id="new-task-date" placeholder="Срок (напр. 15 июн, Сегодня, Завтра)...">
+    <button class="m-btn" onclick="saveTask()">Добавить</button>
+    <button class="m-cancel" onclick="closeM('m-task')">Отмена</button>
+  </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="mwrap" id="m-notes">
+  <div class="modal">
+    <div class="m-handle"></div>
+    <div class="m-title">Заметки</div>
+    <textarea class="notes-area" placeholder="Начни писать..."></textarea>
+    <button class="m-btn" onclick="closeM('m-notes')">Сохранить</button>
+    <button class="m-cancel" onclick="closeM('m-notes')">Закрыть</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+const TIMES=['08:00','09:00','10:00','11:00','12:00','13:00','14:00'];
+const MONTHS=['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
+const GREETS=["Привет, {n} 👋","Добро пожаловать, {n}!","Продуктивного дня, {n} 🎯","Учимся на пять, {n}! 📚"];
+const SUBJECTS=[
+  {name:'Русский язык',code:'РУС',cls:'c-rus',book:''},
+  {name:'Литература',code:'ЛИТ',cls:'c-lit',book:''},
+  {name:'Иностранный язык',code:'АНГ',cls:'c-eng',book:''},
+  {name:'Алгебра',code:'АЛГ',cls:'c-alg',book:''},
+  {name:'Вер. и статистика',code:'ВЕР',cls:'c-ver',book:''},
+  {name:'Геометрия',code:'ГЕО',cls:'c-geo2',book:''},
+  {name:'Информатика',code:'ИНФ',cls:'c-inf',book:''},
+  {name:'Физика',code:'ФИЗ',cls:'c-fiz',book:''},
+  {name:'Химия',code:'ХИМ',cls:'c-him',book:''},
+  {name:'Биология',code:'БИО',cls:'c-bio',book:''},
+  {name:'История',code:'ИСТ',cls:'c-ist',book:''},
+  {name:'Обществознание',code:'ОБЩ',cls:'c-obs',book:''},
+  {name:'География',code:'ГЕО',cls:'c-geo',book:''},
+  {name:'Физкультура',code:'ФКТ',cls:'c-fkult',book:''},
+  {name:'ОБЗР',code:'ОБЗ',cls:'c-obzr',book:''},
+  {name:'Разговоры о важном',code:'РАЗ',cls:'c-razg',book:''}
+];
+let schedData=Array.from({length:5},()=>Array(7).fill(''));
+let gradeData={};
+let hwData={};
+let tasks=[];
+let doneTasks=[];
+let curDay=0;
+let weekOffset=0;
+let selSchDay=2;
+let apiKey='';
+let taskId=1;
+const vtimers={};
+let ovInterval=null;
+let ovSec=0;
+let recognition=null;
+let lastTranscript='';
+const aiModes={};
+
+function go(p){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s-'+p).classList.add('on');
+  if(p==='home')renderHome();
+  if(p==='sch')renderSch();
+  if(p==='grades')renderGrades();
+  if(p==='tasks')renderTasks();
+  if(p==='settings')renderSettings();
+  updateAvatars();
+}
+
+function getSub(name){
+  return SUBJECTS.find(s=>s.name.toLowerCase()===name.toLowerCase())||
+    SUBJECTS.find(s=>name.toLowerCase().includes(s.name.toLowerCase().split(' ')[0]))||
+    {name,code:name.substring(0,3).toUpperCase(),cls:'c-alg',book:''};
+}
+
+// SETTINGS
+function renderSettings(){
+  const c=document.getElementById('subj-set');
+  c.innerHTML='';
+  SUBJECTS.forEach((s,i)=>{
+    c.innerHTML+=`<div class="s-row">
+      <div class="sico ${s.cls}" style="width:30px;height:30px;border-radius:8px;font-size:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2">${s.code}</div>
+      <div style="flex:1;min-width:0;margin-left:8px">
+        <div style="color:var(--t2);font-size:11px;margin-bottom:4px">${s.name}</div>
+        <input class="s-val" style="width:100%" placeholder="Учебник (автор, класс)..." value="${s.book}" oninput="SUBJECTS[${i}].book=this.value">
+      </div>
+    </div>`;
+  });
+  renderSchSlots();
+}
+function selDay(el,i){
+  document.querySelectorAll('#day-tabs-set .day-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');curDay=i;renderSchSlots();
+}
+function renderSchSlots(){
+  const c=document.getElementById('sch-slots');if(!c)return;
+  c.innerHTML='';
+  for(let i=0;i<7;i++){
+    const val=schedData[curDay][i]||'';
+    c.innerHTML+=`<div class="sch-row">
+      <span class="sch-num">${i+1}</span>
+      <input class="sch-inp" placeholder="Предмет..." value="${val}" data-day="${curDay}" data-slot="${i}" oninput="schedData[this.dataset.day][this.dataset.slot]=this.value;refreshViews()">
+      <span class="sch-time">${TIMES[i]||''}</span>
+    </div>`;
+  }
+}
+function refreshViews(){
+  if(document.getElementById('s-home').classList.contains('on'))renderHome();
+  if(document.getElementById('s-sch').classList.contains('on'))renderSch();
+}
+
+// HOME
+function renderHome(){
+  const sl=schedData[2]||[];
+  const list=document.getElementById('today-les');
+  const lbl=document.getElementById('today-lbl');
+  list.innerHTML='';let cnt=0;
+  sl.forEach((sn,i)=>{
+    if(!sn.trim())return;
+    const sub=getSub(sn.trim());
+    list.innerHTML+=buildCard('hl',2,i,sub);cnt++;
+  });
+  document.getElementById('today-cnt').textContent=cnt;
+  lbl.style.display=cnt?'block':'none';
+  updateAvg();
+}
+
+function buildCard(pfx,day,slot,sub){
+  const hw=hwData[sub.name]||'';
+  const id=`${pfx}-${day}-${slot}`;
+  const aiId=`ai-${pfx}-${day}-${slot}`;
+  return `<div class="les" id="${id}">
+    <div class="les-row" onclick="toggleHW('hwp-${pfx}-${day}-${slot}')">
+      <div class="sico ${sub.cls}">${sub.code}</div>
+      <div class="lb"><div class="ln">${sub.name}</div><div class="lt" id="lt-${pfx}-${day}-${slot}">${hw||'ДЗ не задано'}</div></div>
+      <div class="ltm">${TIMES[slot]||''}</div>
+    </div>
+    <div class="hw-panel" id="hwp-${pfx}-${day}-${slot}">
+      <div class="hw-lbl">Домашнее задание</div>
+      <div class="hw-txt" id="hwtxt-${pfx}-${day}-${slot}">${hw||'Не задано'}</div>
+      <input class="hw-inp" placeholder="Записать ДЗ..." value="${hw}" onchange="saveHW('${sub.name}','${pfx}',${day},${slot},this.value)">
+      <div class="ai-block">
+        <div class="ai-toggle">
+          <button class="on" id="bsolve-${aiId}" onclick="setMode('${aiId}','solve');event.stopPropagation()">Решение</button>
+          <button id="bexpl-${aiId}" onclick="setMode('${aiId}','explain');event.stopPropagation()">Объяснение</button>
+        </div>
+        <button class="ai-ask-btn" onclick="askAI('${sub.name}','${aiId}');event.stopPropagation()">
+          <i class="ti ti-sparkles" style="font-size:14px"></i> Спросить ИИ
+        </button>
+        <div id="air-${aiId}"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleHW(id){
+  const p=document.getElementById(id);if(!p)return;
+  const was=p.classList.contains('open');
+  document.querySelectorAll('.hw-panel.open').forEach(h=>h.classList.remove('open'));
+  if(!was)p.classList.add('open');
+}
+
+function saveHW(subName,pfx,day,slot,val){
+  hwData[subName]=val;
+  document.querySelectorAll(`[id^="lt-"]`).forEach(el=>{
+    const parts=el.id.split('-');
+    if(parts.length>=4){
+      const elDay=parseInt(parts[2]),elSlot=parseInt(parts[3]);
+      const sn=(schedData[elDay]||[])[elSlot]||'';
+      if(getSub(sn).name===subName) el.textContent=val||'ДЗ не задано';
+    }
+  });
+  document.querySelectorAll(`[id^="hwtxt-"]`).forEach(el=>{
+    const parts=el.id.split('-');
+    if(parts.length>=4){
+      const elDay=parseInt(parts[2]),elSlot=parseInt(parts[3]);
+      const sn=(schedData[elDay]||[])[elSlot]||'';
+      if(getSub(sn).name===subName) el.textContent=val||'Не задано';
+    }
+  });
+}
+
+function setMode(aiId,mode){
+  aiModes[aiId]=mode;
+  const bs=document.getElementById('bsolve-'+aiId);
+  const be=document.getElementById('bexpl-'+aiId);
+  if(bs) bs.classList.toggle('on',mode==='solve');
+  if(be) be.classList.toggle('on',mode==='explain');
+}
+
+async function askAI(subName,aiId){
+  const r=document.getElementById('air-'+aiId);if(!r)return;
+  if(!apiKey){r.innerHTML='<div class="ai-result" style="color:var(--ora)">Введи Gemini API ключ в Настройках</div>';return;}
+  const hw=hwData[subName]||'';
+  if(!hw){r.innerHTML='<div class="ai-result" style="color:var(--t3)">Сначала запиши ДЗ выше</div>';return;}
+  const sub=getSub(subName);
+  const mode=aiModes[aiId]||'solve';
+  const prompt=mode==='solve'
+    ?`Ты помощник школьника. Предмет: ${subName}. Учебник: ${sub.book||subName}. ДЗ: "${hw}". Дай решение по шагам. Отвечай по-русски, кратко.`
+    :`Ты помощник школьника. Предмет: ${subName}. Учебник: ${sub.book||subName}. ДЗ: "${hw}". Объясни тему и ключевые понятия, чтобы ученик смог выполнить сам. По-русски, кратко.`;
+  r.innerHTML='<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span style="color:var(--t3);font-size:12px;margin-left:4px">ИИ думает...</span></div>';
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    const d=await res.json();
+    const txt=d?.candidates?.[0]?.content?.parts?.[0]?.text||'Нет ответа от ИИ';
+    r.innerHTML=`<div class="ai-result">${txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<i>$1</i>')}</div>`;
+  }catch(e){r.innerHTML=`<div class="ai-result" style="color:var(--red)">Ошибка: ${e.message}</div>`;}
+}
+
+// SCHEDULE
+function renderSch(){
+  const days=getWeekDays();
+  const wd=document.getElementById('wk-days');
+  document.getElementById('wk-title').textContent=MONTHS[days[0].getMonth()]+' '+days[0].getFullYear();
+  const dn=['Пн','Вт','Ср','Чт','Пт','Сб'];
+  const today=new Date(2026,5,10);
+  wd.innerHTML='';
+  days.forEach((d,i)=>{
+    const isT=d.toDateString()===today.toDateString();
+    wd.innerHTML+=`<div class="day${isT?' on':''}" onclick="clickDay(${i})"><div class="dn">${dn[i]||'Сб'}</div><div class="dd">${d.getDate()}</div></div>`;
+  });
+  renderSchDay(selSchDay);
+}
+function getWeekDays(){
+  const b=new Date(2026,5,8);b.setDate(b.getDate()+weekOffset*7);
+  return Array.from({length:6},(_,i)=>{const d=new Date(b);d.setDate(d.getDate()+i);return d;});
+}
+function changeWeek(d){weekOffset+=d;renderSch();}
+function clickDay(i){
+  selSchDay=i;
+  document.querySelectorAll('#wk-days .day').forEach((d,j)=>d.classList.toggle('on',j===i));
+  renderSchDay(i);
+}
+function renderSchDay(di){
+  const dayIdx=di<5?di:0;
+  const sl=schedData[dayIdx]||[];
+  const list=document.getElementById('sch-list');
+  if(!list)return;list.innerHTML='';let cnt=0;
+  sl.forEach((sn,idx)=>{
+    if(!sn.trim())return;
+    const sub=getSub(sn.trim());
+    list.innerHTML+=buildCard('sc',dayIdx,idx,sub);cnt++;
+  });
+  if(!cnt)list.innerHTML='<div style="color:var(--t3);font-size:13px;text-align:center;padding:30px 20px">Уроков нет. Добавь в Настройках → Расписание.</div>';
+  list.innerHTML+='<div style="height:20px"></div>';
+}
+
+// GRADES
+function renderGrades(){
+  const chips=document.getElementById('g-chips');
+  chips.innerHTML='';
+  SUBJECTS.forEach((s,i)=>{chips.innerHTML+=`<div class="chip${i===0?' on':''}" onclick="selChip(this)">${s.name}</div>`;});
+  renderGList();
+  updateAvg();
+}
+function renderGList(){
+  const list=document.getElementById('g-list');if(!list)return;
+  list.innerHTML='';
+  let hasAny=false;
+  SUBJECTS.forEach(s=>{
+    const gr=gradeData[s.name];if(!gr||!gr.length)return;
+    hasAny=true;
+    const avg=(gr.reduce((a,b)=>a+b,0)/gr.length).toFixed(1);
+    const recent=gr.slice(-6);
+    const boxes=recent.map((g,i)=>`<div class="gb g${g}${i===recent.length-1?' gnw':''}">${g}</div>`).join('');
+    const cid='mc-'+s.name.replace(/\W/g,'_');
+    list.innerHTML+=`<div class="sg"><div class="sgh"><span class="sgn">${s.name}</span><span class="sga">${avg}</span></div>
+      <div class="sg-row"><div class="gbs">${boxes}</div><canvas class="mc" id="${cid}" width="54" height="30"></canvas></div></div>`;
+    setTimeout(()=>drawChart(cid,gr),50);
+  });
+  if(!hasAny)list.innerHTML='<div style="color:var(--t3);font-size:13px;text-align:center;padding:30px 20px">Оценок пока нет. Добавь первую выше!</div>';
+  list.innerHTML+='<div style="height:20px"></div>';
+}
+function updateAvg(){
+  const all=Object.values(gradeData).flat();
+  const av=all.length?(all.reduce((a,b)=>a+b,0)/all.length).toFixed(1):'—';
+  const el=document.getElementById('avg-val');if(el)el.textContent=av;
+  const el2=document.getElementById('avg-big');
+  if(el2){
+    if(all.length){const p=av.split('.');el2.innerHTML=p[0]+'<span>.'+p[1]+'</span>';}
+    else el2.innerHTML='—<span></span>';
+  }
+  const sub=document.getElementById('avg-sub');
+  if(sub)sub.textContent=all.length?'средний балл':'нет оценок';
+}
+function selChip(el){el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function selGrade(el){el.closest('.gnrow').querySelectorAll('.gn').forEach(g=>g.classList.remove('on'));el.classList.add('on');}
+function addGrade(){
+  const chip=document.querySelector('#g-chips .chip.on');
+  const gb=document.querySelector('.gnrow .gn.on');
+  if(!chip||!gb)return;
+  const sn=chip.textContent;
+  if(!gradeData[sn])gradeData[sn]=[];
+  gradeData[sn].push(parseInt(gb.textContent));
+  renderGList();updateAvg();
+  showToast('Оценка добавлена!');
+}
+function drawChart(id,data){
+  const cv=document.getElementById(id);if(!cv)return;
+  cv.width=54;cv.height=30;const ctx=cv.getContext('2d');
+  const pts=data.slice(-8);const mn=Math.min(...pts)-.5,mx=Math.max(...pts)+.5;
+  const w=54,h=30,p=3;ctx.clearRect(0,0,w,h);ctx.beginPath();
+  pts.forEach((v,i)=>{const x=p+(i/(pts.length-1||1))*(w-2*p);const y=h-p-((v-mn)/(mx-mn||1))*(h-2*p);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.strokeStyle='rgba(157,151,255,.75)';ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.stroke();
+  const lv=pts[pts.length-1];const lx=w-p,ly=h-p-((lv-mn)/(mx-mn||1))*(h-2*p);
+  ctx.beginPath();ctx.arc(lx,ly,2.5,0,Math.PI*2);ctx.fillStyle='#b0a8fc';ctx.fill();
+}
+
+// TASKS
+function renderTasks(){
+  const al=document.getElementById('active-tasks');
+  const dl=document.getElementById('done-tasks');
+  al.innerHTML='';dl.innerHTML='';
+  tasks.forEach(t=>{
+    al.innerHTML+=`<div class="task" onclick="doneTask(${t.id})">
+      <div class="tdot" style="background:${t.date==='Сегодня'?'var(--red)':t.date==='Завтра'?'var(--ora)':'var(--t3)'}"></div>
+      <div class="tb2"><div class="tn">${t.name}</div><div class="tsj">${t.subj}</div></div>
+      <div class="tdate ${t.date==='Сегодня'?'u':t.date==='Завтра'?'o':'n'}">${t.date}</div>
+    </div>`;
+  });
+  doneTasks.forEach(t=>{
+    dl.innerHTML+=`<div class="task done-item"><div class="tdot" style="background:var(--grn)"></div>
+      <div class="tb2"><div class="tn">${t.name}</div><div class="tsj">${t.subj}</div></div></div>`;
+  });
+  document.getElementById('task-cnt').textContent=tasks.length;
+  const chips=document.getElementById('task-chips');
+  chips.innerHTML='';
+  SUBJECTS.forEach((s,i)=>chips.innerHTML+=`<div class="mchip${i===0?' on':''}" onclick="selMC(this)">${s.name}</div>`);
+}
+function doneTask(id){
+  const i=tasks.findIndex(t=>t.id===id);if(i<0)return;
+  doneTasks.push(tasks.splice(i,1)[0]);renderTasks();
+}
+function saveTask(){
+  const name=document.getElementById('new-task-name').value.trim();
+  const date=document.getElementById('new-task-date').value.trim();
+  const chip=document.querySelector('#task-chips .mchip.on');
+  if(!name)return;
+  tasks.push({id:taskId++,name,subj:chip?chip.textContent:'',date:date||''});
+  document.getElementById('new-task-name').value='';
+  document.getElementById('new-task-date').value='';
+  closeM('m-task');renderTasks();
+  showToast('Задание добавлено!');
+}
+function selMC(el){el.closest('.mchips').querySelectorAll('.mchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+
+// VOICE
+function toggleVoice(scr){
+  const fab=document.getElementById('vfab-'+scr);
+  if(vtimers[scr]){stopV(scr);return;}
+  showOv();
+  if(fab){fab.classList.add('rec');fab.querySelector('i').className='ti ti-player-stop';}
+  const tp=document.getElementById('tp-'+scr);
+  const tpt=document.getElementById('tpt-'+scr);
+  if(tp)tp.classList.add('show');
+  let s=0;
+  vtimers[scr]=setInterval(()=>{s++;const m=Math.floor(s/60),sec=s%60;if(tpt)tpt.textContent=m+':'+(sec<10?'0':'')+sec;},1000);
+  startListen();
+}
+function stopV(scr){
+  if(vtimers[scr]){clearInterval(vtimers[scr]);delete vtimers[scr];}
+  const fab=document.getElementById('vfab-'+scr);
+  const tp=document.getElementById('tp-'+scr);
+  const tpt=document.getElementById('tpt-'+scr);
+  if(fab){fab.classList.remove('rec');fab.querySelector('i').className='ti ti-microphone';}
+  if(tp)tp.classList.remove('show');
+  if(tpt)tpt.textContent='0:00';
+}
+function showOv(){
+  document.getElementById('ov-main').classList.add('show');
+  const conf=document.getElementById('ov-confirm');
+  if(conf)conf.classList.remove('show');
+  document.getElementById('ov-tr').textContent='Ждём речь...';
+  ovSec=0;document.getElementById('ov-timer').textContent='0:00';
+  if(ovInterval)clearInterval(ovInterval);
+  ovInterval=setInterval(()=>{ovSec++;const m=Math.floor(ovSec/60),s=ovSec%60;document.getElementById('ov-timer').textContent=m+':'+(s<10?'0':'')+s;},1000);
+}
+function closeOv(){
+  document.getElementById('ov-main').classList.remove('show');
+  if(ovInterval){clearInterval(ovInterval);ovInterval=null;}
+  if(recognition){try{recognition.stop();}catch(e){}}
+  ['home','sch','tasks','grades'].forEach(s=>stopV(s));
+}
+function startListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('ov-tr').textContent='Используй Chrome для голосового ввода';return;}
+  recognition=new SR();
+  recognition.lang='ru-RU';recognition.interimResults=true;recognition.continuous=false;
+  recognition.onresult=e=>{
+    let interim='',final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)final+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
+    }
+    const txt=final||interim;
+    document.getElementById('ov-tr').textContent=txt||'Слушаем...';
+    if(final){lastTranscript=final;const c=document.getElementById('ov-confirm');if(c)c.classList.add('show');}
+  };
+  recognition.onerror=e=>{document.getElementById('ov-tr').textContent='Ошибка: '+e.error;};
+  recognition.start();
+}
+function stopListening(){
+  if(recognition){try{recognition.stop();}catch(e){}}
+  if(lastTranscript){const c=document.getElementById('ov-confirm');if(c)c.classList.add('show');}
+}
+function confirmVoice(){
+  if(!lastTranscript){closeOv();return;}
+  parseAndSave(lastTranscript);
+  lastTranscript='';
+  closeOv();
+}
+function parseAndSave(txt){
+  const low=txt.toLowerCase();
+  let found=null;
+  SUBJECTS.forEach(s=>{if(low.includes(s.name.toLowerCase()))found=s;});
+  if(!found){showToast('Предмет не распознан. Скажи название предмета.');return;}
+  const hw=txt.replace(new RegExp(found.name,'gi'),'').replace(/дз|домашнее задание|задание/gi,'').replace(/^[\s,]+/,'').trim();
+  hwData[found.name]=hw||txt;
+  renderHome();
+  if(document.getElementById('s-sch').classList.contains('on'))renderSch();
+  showToast(`ДЗ по «${found.name}» сохранено!`);
+}
+
+// PROFILE
+function updateProfile(){
+  const name=document.getElementById('inp-name').value.trim()||'';
+  const sur=document.getElementById('inp-sur').value.trim()||'';
+  const init=((name[0]||'А').toUpperCase()+(sur[0]||'Б').toUpperCase());
+  document.querySelectorAll('.avbtn').forEach(b=>b.textContent=init);
+  const g=GREETS[Math.floor(Math.random()*GREETS.length)];
+  document.getElementById('hgrt').textContent=g.replace('{n}',name||'друг');
+}
+function updateAvatars(){
+  const name=document.getElementById('inp-name').value.trim()||'А';
+  const sur=document.getElementById('inp-sur').value.trim()||'Б';
+  const init=name[0].toUpperCase()+sur[0].toUpperCase();
+  document.querySelectorAll('.avbtn').forEach(b=>b.textContent=init);
+}
+
+function openM(id){document.getElementById(id).classList.add('show');}
+function closeM(id){document.getElementById(id).classList.remove('show');}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+document.getElementById('home-scrl').addEventListener('scroll',function(){
+  document.getElementById('grwrap').classList.toggle('col',this.scrollTop>40);
+});
+
+renderHome();renderSch();renderSettings();renderTasks();renderGrades();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+// Убираем задержку тапа на мобильных
+document.addEventListener('touchstart',()=>{},{passive:true});
+</script>
